@@ -20,6 +20,8 @@ from sqlalchemy import create_engine, MetaData
 from app.models.user.schema import User
 from app import db
 import time
+import pandas as pd
+import xlrd
 
 Engine = create_engine(SQLALCHEMY_DATABASE_URI, pool_size=POOL_SIZE, max_overflow=0)
 connec = Engine.connect()
@@ -29,13 +31,24 @@ connec = Engine.connect()
 #select * from metric1 where substring(split_part(school_server_code, '-', 2) from 1 for 2) = 'tg';
 #'''
 
+
 def get_all_schools():
     '''
     fetch all unique schools in db
     :return: list of schools
     '''
-    all_schools = connec.execute('SELECT DISTINCT school_server_code FROM metric1;').fetchall()
-    return [''.join(each[0].split('-')[::-1]) for each in all_schools]
+    worksheets = ['CG Schools', 'MZ Schools', 'RJ Schools', 'TS Schools']
+    all_schools = []
+    #all_schools = connec.execute('SELECT DISTINCT school_server_code FROM metric1;').fetchall()
+
+    for ws in worksheets:
+        df = pd.read_excel('CLIxDashboard-Login-IDs.xlsx', sheet_name=ws, usecols=['CLIxDashboard Login ID'])
+        all_schools.extend(df['CLIxDashboard Login ID'].values.tolist())
+    print('all_schools:', len(all_schools))
+
+    return all_schools
+
+    #return [''.join(each[0].split('-')[::-1]) for each in all_schools]
 
 def create_ro_school_admins(school_admins):
     '''
@@ -69,6 +82,7 @@ def create_ro_school_admins(school_admins):
 
             users = [each[0] for each in connec.execute(list_users).fetchall()]
             if user not in users:
+                print("creatin user:", user)
                 connec.execute(assign_users)
                 create_school_user(user) 
             else:
