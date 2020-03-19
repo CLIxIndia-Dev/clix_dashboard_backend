@@ -113,10 +113,10 @@ class SchoolAPI(Resource):
         return {'result': True}
 '''
 
-@app.before_request
-def before_request_func():
-    print("before_request is running!")
-    #return "Intercepted by before_request"
+#@app.before_request
+#def before_request_func():
+#    print("before_request is running!")
+#    #return "Intercepted by before_request"
 
 class AuthenticateAPI(Resource):
     """
