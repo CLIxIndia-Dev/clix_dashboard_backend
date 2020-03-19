@@ -113,6 +113,11 @@ class SchoolAPI(Resource):
         return {'result': True}
 '''
 
+@app.before_request
+def before_request_func():
+    print("before_request is running!")
+    #return "Intercepted by before_request"
+
 class AuthenticateAPI(Resource):
     """
     User Login Resource
@@ -129,6 +134,7 @@ class AuthenticateAPI(Resource):
 
         try:
             # fetch the user data
+            #print("inside try of getschooldata")
             user = User.query.filter_by(
                 username=post_data['username']
             ).first()
@@ -177,7 +183,7 @@ class GetDataAPI(Resource):
             # fetch the user data
             school_user_code = User.query.filter_by(id=g.user).first().username
 
-            school_server_code = school_user_code[-7:] + '-' + school_user_code[0:-7]
+            school_server_code = school_user_code[-7:] + '-' + school_user_code[0:-8]
 
             school_attendance_table = Metric1.query.filter_by(
                 school_server_code=school_server_code
@@ -257,7 +263,8 @@ class SchoolInfoAPI(Resource):
         try:
             # fetch the user data
             school_user_code = User.query.filter_by(id=g.user).first().username
-            school_server_code = school_user_code[-7:] + '-' + school_user_code[0:-7]
+            school_server_code = school_user_code[-7:] + '-' + school_user_code[0:-8]
+            #print("schoolservercode:",school_server_code)
             school_description = SchoolInfo.query.filter_by(school_server_code=school_server_code
                                                             ).order_by(desc(SchoolInfo.dateUpdated
                                                                             )).first().schoolDescription
@@ -292,7 +299,7 @@ class SchoolInfoAPI(Resource):
 
         try:
             school_user_code = User.query.filter_by(id=g.user).first().username
-            school_server_code = school_user_code[-7:] + '-' + school_user_code[0:-7]
+            school_server_code = school_user_code[-7:] + '-' + school_user_code[0:-8]
 
             schoolDescription = post_data['schoolDescription']
             dateUpdated = datetime.utcnow()
@@ -335,7 +342,7 @@ class SchoolImageAPI(Resource):
         try:
             # fetch the user data
             school_user_code = User.query.filter_by(id=g.user).first().username
-            school_server_code = school_user_code[-7:] + '-' + school_user_code[0:-7]
+            school_server_code = school_user_code[-7:] + '-' + school_user_code[0:-8]
             school_image_name = SchoolImage.query.filter_by(school_server_code=school_server_code
                                                           ).order_by(
                 desc(SchoolImage.dateUpdated)).first().schoolImageName
@@ -384,7 +391,7 @@ class SchoolImageAPI(Resource):
 
         try:
             school_user_code = User.query.filter_by(id=g.user).first().username
-            school_server_code = school_user_code[-7:] + '-' + school_user_code[0:-7]
+            school_server_code = school_user_code[-7:] + '-' + school_user_code[0:-8]
 
             dateUpdated = datetime.utcnow()
             image_file_name = school_server_code + dateUpdated.strftime('_%Y%b%d_%Hh%Mm%Ss') + '.' + mimetype
