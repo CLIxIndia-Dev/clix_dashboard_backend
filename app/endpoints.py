@@ -17,7 +17,7 @@ from flask import url_for
 api = Api(app)
 
 upload_folder = app.config['UPLOAD_FOLDER']
-
+#exception_schools = app.config['CT_EXCEPTION_SCHOOLS']
 '''
 @app.after_request
 def add_no_cache_header(response):
@@ -182,9 +182,10 @@ class GetDataAPI(Resource):
         try:
             # fetch the user data
             school_user_code = User.query.filter_by(id=g.user).first().username
-
-            school_server_code = school_user_code[-7:] + '-' + school_user_code[0:-8]
-
+            if school_user_code[0:-8] in ['ct31', 'ct32', 'ct33', 'ct34', 'ct35']:
+                school_server_code = '-' + school_user_code[0:-8]
+            else:
+                school_server_code = school_user_code[-7:] + '-' + school_user_code[0:-8]
             school_attendance_table = Metric1.query.filter_by(
                 school_server_code=school_server_code
             ).order_by(desc(Metric1.date)).distinct(Metric1.date).all()
