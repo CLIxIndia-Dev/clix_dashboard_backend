@@ -3,7 +3,7 @@ from flask import Flask, jsonify, abort, make_response, g, send_from_directory
 from flask_restful import Api, Resource, reqparse, fields, marshal
 # from flask_login import login_user, logout_user, current_user, login_required
 from app import app
-from app.models.school.schema import Metric1, Metric2, Metric3, Metric4, Metric5, Metric6, SchoolInfo, SchoolImage
+from app.models.school.schema import Metric1, Metric2, Metric3, Metric4, Metric5, Metric6, SchoolInfo, SchoolImage, DistrictDetails, DistrictToSchoolMapping
 from app.models.user.schema import User
 from flask import Blueprint, request, make_response, jsonify
 from app import bcrypt
@@ -142,6 +142,190 @@ class AuthenticateAPI(Resource):
             if user and bcrypt.check_password_hash(
                     user.password_hash, post_data['password']
             ):
+                auth_token = user.encode_auth_token(user.id)
+                if auth_token:
+                    responseObject = {
+                        'status': 'success',
+                        'message': 'Successfully Authenticated.',
+                        'auth_token': auth_token.decode()
+                    }
+                    return make_response(jsonify(responseObject), 200)
+            else:
+                responseObject = {
+                    'status': 'fail',
+                    'message': 'User does not exist.'
+                }
+                return make_response(jsonify(responseObject), 404)
+        except Exception as e:
+            print(e)
+            responseObject = {
+                'status': 'fail',
+                'message': 'Try again'
+            }
+            return make_response(jsonify(responseObject), 500)
+
+class DistrictListAPI(Resource):
+    
+    def __init__(self):
+        self.reqparse = reqparse.RequestParser()
+        self.reqparse.add_argument('state_id', type=str)
+        super(DistrictListAPI, self).__init__()
+
+    def get(self,state_id):
+        try:
+            def serialize_data(record):
+                if record is not None:
+                    record_dict = dict((col, getattr(record, col)) for col in record.__table__.columns.keys())
+                    #record_dict['date'] = record_dict['date'].strftime("%Y%m%d")
+                    return record_dict
+                else:
+                    return None
+            print("inside get:")
+            districtcur = DistrictDetails.query.filter_by(state_code = state_id)
+            print("post query") 
+            districts = [serialize_data(each) for each in districtcur]
+            if districts:
+                responseObject = {
+                'status': 'success',
+                'message': 'Successfully Fetched data Table.',
+                'dist_data': districts
+            }
+                return make_response(jsonify(responseObject), 200)
+            else:
+                responseObject = {
+                    'status': 'success',
+                    'message': 'No districts found for the state code given.'
+                }
+                return make_response(jsonify(responseObject), 200)
+        except Exception as e:
+            print(e)
+            responseObject = {
+                'status': 'fail',
+                'message': 'Try again'
+            }
+            return make_response(jsonify(responseObject), 500)
+
+class DistrictListAPI(Resource):
+    
+    def __init__(self):
+        self.reqparse = reqparse.RequestParser()
+        self.reqparse.add_argument('state_id', type=str)
+        super(DistrictListAPI, self).__init__()
+
+    def get(self,state_id):
+        try:
+            def serialize_data(record):
+                if record is not None:
+                    record_dict = dict((col, getattr(record, col)) for col in record.__table__.columns.keys())
+                    #record_dict['date'] = record_dict['date'].strftime("%Y%m%d")
+                    return record_dict
+                else:
+                    return None
+            #print("inside get:")
+            districtcur = DistrictDetails.query.filter_by(state_code = state_id)
+            #print("post query") 
+            districts = [serialize_data(each) for each in districtcur]
+            if districts:
+                responseObject = {
+                'status': 'success',
+                'message': 'Successfully Fetched data Table.',
+                'dist_data': districts
+            }
+                g.state_code = state_id
+                print("g values:",g.state_code)
+                return make_response(jsonify(responseObject), 200)
+            else:
+                responseObject = {
+                    'status': 'success',
+                    'message': 'No districts found for the state code given.'
+                }
+                return make_response(jsonify(responseObject), 200)
+        except Exception as e:
+            print(e)
+            responseObject = {
+                'status': 'fail',
+                'message': 'Try again'
+            }
+            return make_response(jsonify(responseObject), 500)
+
+
+class SchoolsListAPI(Resource):
+    
+    def __init__(self):
+        self.reqparse = reqparse.RequestParser()
+        self.reqparse.add_argument('district_id', type=str)
+        super(SchoolsListAPI, self).__init__()
+
+    def get(self,state_id,district_id):
+        try:
+            def serialize_data(record):
+                if record is not None:
+                    record_dict = dict((col, getattr(record, col)) for col in record.__table__.columns.keys())
+                    #record_dict['date'] = record_dict['date'].strftime("%Y%m%d")
+                    return record_dict
+                else:
+                    return None
+            print("inside get:")
+            schoolcur = DistrictToSchoolMapping.query.filter_by(state_code = state_id, distirct_code = district_id)
+            print("post query") 
+            schools = [serialize_data(each) for each in schoolcur]
+            if schools:
+                responseObject = {
+                'status': 'success',
+                'message': 'Successfully Fetched data Table.',
+                'sch_data': schools
+            }
+                g.district = district_id
+                return make_response(jsonify(responseObject), 200)
+            else:
+                responseObject = {
+                    'status': 'success',
+                    'message': 'No districts found for the state code given.'
+                }
+                return make_response(jsonify(responseObject), 200)
+        except Exception as e:
+            print(e)
+            responseObject = {
+                'status': 'fail',
+                'message': 'Try again'
+            }
+            return make_response(jsonify(responseObject), 500)
+
+
+class GetAuthTokenAPI(Resource):
+    """
+    User Login Resource
+    """
+
+    def __init__(self):
+        self.reqparse = reqparse.RequestParser()
+        super(AuthenticateAPI, self).__init__()
+
+    def post(self):
+        # get the post data
+        # args = self.reqparse.parse_args()
+        post_data = request.get_json()
+
+        try:
+            # fetch the user data
+            #print("inside try of getschooldata")
+
+            school = DistrictToSchoolMapping.query.filter_by(
+                school_name=post_data['school_name']
+            ).first()
+            schoolcode = school.school_server_code
+            if school.state_code == 1:
+                state = 'ct'
+            elif school.state_code == 2:
+                state = 'mz'
+            elif school.state_code == 3:
+                state = 'rj'
+            else:
+                state = 'tg'
+            uname = state + schoolcode.split[:2].lstrip('0') + schoolcode
+            user = User.query.filter_by(username = uname)
+            #password = user.
+            if user:
                 auth_token = user.encode_auth_token(user.id)
                 if auth_token:
                     responseObject = {
@@ -425,6 +609,7 @@ api.add_resource(SchoolImageAPI, '/schoolimage', endpoint='schoolimage')
 api.add_resource(SchoolInfoAPI, '/schoolinfo', endpoint='schoolinfo')
 api.add_resource(GetDataAPI, '/getschooldata', endpoint='getschooldata')
 api.add_resource(AuthenticateAPI, '/authenticate', endpoint='authenticate')
-
+api.add_resource(DistrictListAPI, '/districts/<state_id>', endpoint='getdistricts')
+api.add_resource(SchoolsListAPI, '/schools/<state_id>/<district_id>', endpoint='getschools')
 # api.add_resource(TaskListAPI, '/tasks', endpoint='tasks')
 # api.add_resource(SchoolAPI, '/tasks/<int:id>', endpoint='task')
