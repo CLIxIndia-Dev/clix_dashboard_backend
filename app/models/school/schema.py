@@ -213,7 +213,7 @@ class SchoolInfo(db.Model):
     '''
     __tablename__ = 'schoolinfo'
     id = db.Column(db.Integer, primary_key=True)
-    school_server_code = db.Column(db.String(64), index=True, unique=False, nullable=False)
+    school_server_code = db.Column(db.String(64), index=True, unique=True, nullable=False)
     dateUpdated = db.Column(db.DateTime, unique=False, nullable=True)
     schoolDescription = db.Column(db.Text, index=False, unique=False, nullable=True)
 
@@ -234,12 +234,71 @@ class SchoolImage(db.Model):
 
     __tablename__ = 'schoolimage'
     id = db.Column(db.Integer, primary_key=True)
-    school_server_code = db.Column(db.String(64), index=True, unique=False, nullable=False)
+    school_server_code = db.Column(db.String(64), index=True, unique=True, nullable=False)
     dateUpdated = db.Column(db.DateTime, unique=False, nullable=True)
     schoolImageName = db.Column(db.Text, index=False, unique=False, nullable=True)
 
     def __repr__(self):
         return '<SchoolImage of : {}>'.format(self.school_server_code)
 
+class StateDetails(db.Model):
+    '''
+    This model corresponds to Metric5 of a school.
+    It gives the number of students engaged with different modules in a day.
+    following are the attributes of this table:
+    1. id
+    2. school_server_code
+    3. schoolImageName
+    5. dateUpdated
+    '''
 
+    __tablename__ = 'statedetails'
+    id = db.Column(db.Integer, primary_key=True)
+    state_code = db.Column(db.String(64), index=True, unique=True, nullable=False)
+    dateUpdated = db.Column(db.DateTime, unique=False, nullable=True)
+    stateName = db.Column(db.Text, index=False, unique=False, nullable=True)
+
+    #def __repr__(self):
+    #    return '<SchoolImage of : {}>'.format(self.school_server_code)
+
+class DistrictDetails(db.Model):
+
+    __tablename__ = 'districtdetails'
+    id = db.Column(db.Integer, primary_key=True)
+    distirct_code = db.Column(db.String(64), index=True, nullable=False)
+    #state_code = db.Column(db.String(64), index=True, unique=True, nullable=False)
+    dateUpdated = db.Column(db.DateTime, unique=False, nullable=True)
+    districtName = db.Column(db.Text, index=False, unique=False, nullable=True)
+    state_code = db.Column(
+        db.String(64),
+        db.ForeignKey('statedetails.state_code'),
+        nullable=False
+    )
+    __table_args__ = (db.UniqueConstraint('distirct_code', 'state_code', name='districtdetails_distirct_code'),)
+    #namespace = db.relationship("Namespace", backref="tickets")
+    #def __repr__(self):
+    #    return '<SchoolImage of : {}>'.format(self.school_server_code)
+
+class DistrictToSchoolMapping(db.Model):
+    
+    __tablename__ = 'schooltodistrictmapping'
+    id = db.Column(db.Integer, primary_key=True)
+    school_name = db.Column(db.Text, index=False, unique=False, nullable=False)
+    school_server_code = db.Column(
+        db.String(64),
+        nullable=False
+    )
+    dateUpdated = db.Column(db.DateTime, unique=False, nullable=True)
+    distirct_code = db.Column(
+        db.String(64),
+        #db.ForeignKey('districtdetails.distirct_code'),
+        nullable=False
+    )
+    state_code = db.Column(
+        db.String(64),
+        #db.ForeignKey('districtdetails.state_code'),
+        nullable=False
+    )
+    __table_args__ = (db.ForeignKeyConstraint(['distirct_code', 'state_code'],
+        ['districtdetails.distirct_code', 'districtdetails.state_code'], name='schooltodistrictmapping_distirct_code_fkey1'),)                       
 
