@@ -299,7 +299,7 @@ class GetAuthTokenAPI(Resource):
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
-        super(AuthenticateAPI, self).__init__()
+        super(GetAuthTokenAPI, self).__init__()
 
     def post(self):
         # get the post data
@@ -308,22 +308,24 @@ class GetAuthTokenAPI(Resource):
 
         try:
             # fetch the user data
-            #print("inside try of getschooldata")
+            print("inside try of GetAuthTokenAPI")
 
             school = DistrictToSchoolMapping.query.filter_by(
                 school_name=post_data['school_name']
             ).first()
             schoolcode = school.school_server_code
-            if school.state_code == 1:
+            print("school code received from query:", schoolcode[-2:])
+            if school.state_code == "1":
                 state = 'ct'
-            elif school.state_code == 2:
+            elif school.state_code == "2":
                 state = 'mz'
-            elif school.state_code == 3:
+            elif school.state_code == "3":
                 state = 'rj'
             else:
                 state = 'tg'
-            uname = state + schoolcode.split[:2].lstrip('0') + schoolcode
-            user = User.query.filter_by(username = uname)
+            uname = state + schoolcode[-2:].lstrip('0') + schoolcode
+            print("uname:",uname)
+            user = User.query.filter_by(username = uname).first()
             #password = user.
             if user:
                 auth_token = user.encode_auth_token(user.id)
@@ -611,5 +613,6 @@ api.add_resource(GetDataAPI, '/getschooldata', endpoint='getschooldata')
 api.add_resource(AuthenticateAPI, '/authenticate', endpoint='authenticate')
 api.add_resource(DistrictListAPI, '/districts/<state_id>', endpoint='getdistricts')
 api.add_resource(SchoolsListAPI, '/schools/<state_id>/<district_id>', endpoint='getschools')
+api.add_resource(GetAuthTokenAPI, '/getdata', endpoint='getdata')
 # api.add_resource(TaskListAPI, '/tasks', endpoint='tasks')
 # api.add_resource(SchoolAPI, '/tasks/<int:id>', endpoint='task')
