@@ -308,40 +308,47 @@ class GetAuthTokenAPI(Resource):
 
         try:
             # fetch the user data
-            print("inside try of GetAuthTokenAPI")
+            if post_data['view_mode'] == True:
+                print("inside try of GetAuthTokenAPI")
 
-            school = DistrictToSchoolMapping.query.filter_by(
-                school_name=post_data['school_name']
-            ).first()
-            schoolcode = school.school_server_code
-            print("school code received from query:", schoolcode[-2:])
-            if school.state_code == "1":
-                state = 'ct'
-            elif school.state_code == "2":
-                state = 'mz'
-            elif school.state_code == "3":
-                state = 'rj'
-            else:
-                state = 'tg'
-            uname = state + schoolcode[-2:].lstrip('0') + schoolcode
-            print("uname:",uname)
-            user = User.query.filter_by(username = uname).first()
-            #password = user.
-            if user:
-                auth_token = user.encode_auth_token(user.id)
-                if auth_token:
+                school = DistrictToSchoolMapping.query.filter_by(
+                    school_name=post_data['school_name']
+                ).first()
+                schoolcode = school.school_server_code
+                print("school code received from query:", schoolcode[-2:])
+                if school.state_code == "1":
+                    state = 'ct'
+                elif school.state_code == "2":
+                    state = 'mz'
+                elif school.state_code == "3":
+                    state = 'rj'
+                else:
+                    state = 'tg'
+                uname = state + schoolcode[-2:].lstrip('0') + schoolcode
+                print("uname:",uname)
+                user = User.query.filter_by(username = uname).first()
+                #password = user.
+                if user:
+                    auth_token = user.encode_auth_token(user.id)
+                    if auth_token:
+                        responseObject = {
+                            'status': 'success',
+                            'message': 'Successfully Authenticated.',
+                            'auth_token': auth_token.decode()
+                        }
+                        return make_response(jsonify(responseObject), 200)
+                else:
                     responseObject = {
-                        'status': 'success',
-                        'message': 'Successfully Authenticated.',
-                        'auth_token': auth_token.decode()
+                        'status': 'fail',
+                        'message': 'User does not exist.'
                     }
-                    return make_response(jsonify(responseObject), 200)
+                    return make_response(jsonify(responseObject), 404)
             else:
-                responseObject = {
-                    'status': 'fail',
-                    'message': 'User does not exist.'
-                }
-                return make_response(jsonify(responseObject), 404)
+                    responseObject = {
+                        'status': 'fail',
+                        'message': 'view_mode value not correct.'
+                    }
+                    return make_response(jsonify(responseObject), 404)
         except Exception as e:
             print(e)
             responseObject = {
