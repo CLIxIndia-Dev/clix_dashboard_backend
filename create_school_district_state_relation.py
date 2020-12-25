@@ -97,13 +97,13 @@ def create_school_data():
     #all_schools = connec.execute('SELECT DISTINCT school_server_code FROM metric1;').fetchall()
 
     for ws in worksheets:
-        df = pd.read_excel('CLIxDashboard-Login-IDs.xlsx', sheet_name=ws, usecols=['State code', 'District code', 'School Name', 'Full CLIx School Code'])
+        df = pd.read_excel('CLIxDashboard-Login-IDs.xlsx', sheet_name=ws, usecols=['State code', 'District code', 'School Name', 'Full CLIx School Code', 'Server id '])
         #df = df.drop_duplicates(subset=['District name']).reset_index()
         #print("final dataframe:",df)
         
         for i in df.index:
             #for j in range(0,len(df['state_code'].values))
-            schooldata = DistrictToSchoolMapping(state_code=int(df['State code'].values[i]), distirct_code=str(df['District code'].values[i]), school_name=str(df['School Name'].values[i]), school_server_code=str(df['Full CLIx School Code'].values[i]))
+            schooldata = DistrictToSchoolMapping(state_code=int(df['State code'].values[i]), distirct_code=str(df['District code'].values[i]), school_name=str(df['School Name'].values[i]), school_server_code=str(df['Full CLIx School Code'].values[i]), server_id=str(df['Server id '].values[i]))
             try:
                 db.session.add(schooldata)
                 db.session.commit()
