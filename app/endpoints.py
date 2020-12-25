@@ -315,16 +315,7 @@ class GetAuthTokenAPI(Resource):
                     school_name=post_data['school_name']
                 ).first()
                 schoolcode = school.school_server_code
-                print("school code received from query:", schoolcode[-2:])
-                if school.state_code == "1":
-                    state = 'ct'
-                elif school.state_code == "2":
-                    state = 'mz'
-                elif school.state_code == "3":
-                    state = 'rj'
-                else:
-                    state = 'tg'
-                uname = state + schoolcode[-2:].lstrip('0') + schoolcode
+                uname = school.server_id + '0' + schoolcode
                 print("uname:",uname)
                 user = User.query.filter_by(username = uname).first()
                 #password = user.
@@ -334,7 +325,8 @@ class GetAuthTokenAPI(Resource):
                         responseObject = {
                             'status': 'success',
                             'message': 'Successfully Authenticated.',
-                            'auth_token': auth_token.decode()
+                            'auth_token': auth_token.decode(),
+                            'view_mode': post_data['view_mode']
                         }
                         return make_response(jsonify(responseObject), 200)
                 else:
@@ -620,6 +612,6 @@ api.add_resource(GetDataAPI, '/getschooldata', endpoint='getschooldata')
 api.add_resource(AuthenticateAPI, '/authenticate', endpoint='authenticate')
 api.add_resource(DistrictListAPI, '/districts/<state_id>', endpoint='getdistricts')
 api.add_resource(SchoolsListAPI, '/schools/<state_id>/<district_id>', endpoint='getschools')
-api.add_resource(GetAuthTokenAPI, '/getdata', endpoint='getdata')
+api.add_resource(GetAuthTokenAPI, '/gettoken', endpoint='gettoken')
 # api.add_resource(TaskListAPI, '/tasks', endpoint='tasks')
 # api.add_resource(SchoolAPI, '/tasks/<int:id>', endpoint='task')
