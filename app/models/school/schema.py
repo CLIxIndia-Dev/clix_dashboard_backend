@@ -288,6 +288,7 @@ class DistrictToSchoolMapping(db.Model):
         db.String(64),
         nullable=False
     )
+    server_id = db.Column(db.Text, index=False, unique=True, nullable=False)
     dateUpdated = db.Column(db.DateTime, unique=False, nullable=True)
     distirct_code = db.Column(
         db.String(64),
