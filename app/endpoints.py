@@ -261,7 +261,13 @@ class SchoolsListAPI(Resource):
             def serialize_data(record):
                 if record is not None:
                     record_dict = dict((col, getattr(record, col)) for col in record.__table__.columns.keys())
-                    #record_dict['date'] = record_dict['date'].strftime("%Y%m%d")
+                    #record_dict['school_name'] = record_dict['server_id']+'-'+record_dict['school_name']
+                    user = User.query.filter_by(username = (record_dict['server_id']+'0'+record_dict['school_server_code'])).first()
+                    #print("user:",user)
+                    if user != None:
+                        record_dict['school_name'] = record_dict['server_id']+'-'+record_dict['school_name']
+                    else:
+                        record_dict['school_name'] = record_dict['server_id']+'-'+record_dict['school_name']+'- Not synced'
                     return record_dict
                 else:
                     return None
@@ -310,7 +316,7 @@ class GetAuthTokenAPI(Resource):
             # fetch the user data
             if post_data['view_mode'] == True:
                 print("inside try of GetAuthTokenAPI")
-
+                post_data['school_name'] = post_data['school_name'].split('-')[1]
                 school = DistrictToSchoolMapping.query.filter_by(
                     school_name=post_data['school_name']
                 ).first()
