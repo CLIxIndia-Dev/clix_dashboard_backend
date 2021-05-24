@@ -216,7 +216,7 @@ class SchoolInfo(db.Model):
     school_server_code = db.Column(db.String(64), index=True, unique=True, nullable=False)
     dateUpdated = db.Column(db.DateTime, unique=False, nullable=True)
     schoolDescription = db.Column(db.Text, index=False, unique=False, nullable=True)
-
+    school_udisce_code = db.Column(db.String(64), index=True, unique=True, nullable=False)
     def __repr__(self):
         return '<SchoolInfo of : {}>'.format(self.school_server_code)
 
@@ -288,6 +288,10 @@ class DistrictToSchoolMapping(db.Model):
         db.String(64),
         nullable=False
     )
+    school_udisce_code = db.Column(
+                db.String(64),
+                nullable=False
+            )
     server_id = db.Column(db.Text, index=False, unique=True, nullable=False)
     dateUpdated = db.Column(db.DateTime, unique=False, nullable=True)
     distirct_code = db.Column(
